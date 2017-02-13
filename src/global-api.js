@@ -1,17 +1,3 @@
-import {
-  set,
-  del,
-  nextTick,
-  mergeOptions,
-  classify,
-  toArray,
-  commonTagRE,
-  reservedTagRE,
-  warn,
-  isPlainObject,
-  extend
-} from './util/index'
-
 import config from './config'
 import directives from './directives/public/index'
 import elementDirectives from './directives/element/index'
@@ -53,9 +39,9 @@ export default function (Vue) {
 
   Vue.util = util
   Vue.config = config
-  Vue.set = set
-  Vue.delete = del
-  Vue.nextTick = nextTick
+  Vue.set = util.set
+  Vue.delete = util.del
+  Vue.nextTick = util.nextTick
 
   /**
    * The following are exposed for advanced usage / plugins
@@ -97,7 +83,7 @@ export default function (Vue) {
     var name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production') {
       if (!/^[a-zA-Z][\w-]*$/.test(name)) {
-        warn(
+        util.warn(
           'Invalid component name: "' + name + '". Component names ' +
           'can only contain alphanumeric characaters and the hyphen.'
         )
@@ -108,7 +94,7 @@ export default function (Vue) {
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
-    Sub.options = mergeOptions(
+    Sub.options = util.mergeOptions(
       Super.options,
       extendOptions
     )
@@ -143,7 +129,7 @@ export default function (Vue) {
   function createClass (name) {
     /* eslint-disable no-new-func */
     return new Function(
-      'return function ' + classify(name) +
+      'return function ' + util.classify(name) +
       ' (options) { this._init(options) }'
     )()
     /* eslint-enable no-new-func */
@@ -161,7 +147,7 @@ export default function (Vue) {
       return
     }
     // additional parameters
-    var args = toArray(arguments, 1)
+    var args = util.toArray(arguments, 1)
     args.unshift(this)
     if (typeof plugin.install === 'function') {
       plugin.install.apply(plugin, args)
@@ -178,7 +164,7 @@ export default function (Vue) {
    */
 
   Vue.mixin = function (mixin) {
-    Vue.options = mergeOptions(Vue.options, mixin)
+    Vue.options = util.mergeOptions(Vue.options, mixin)
   }
 
   /**
@@ -198,9 +184,9 @@ export default function (Vue) {
         if (process.env.NODE_ENV !== 'production') {
           if (
             type === 'component' &&
-            (commonTagRE.test(id) || reservedTagRE.test(id))
+            (util.commonTagRE.test(id) || util.reservedTagRE.test(id))
           ) {
-            warn(
+            util.warn(
               'Do not use built-in or reserved HTML elements as component ' +
               'id: ' + id
             )
@@ -208,7 +194,7 @@ export default function (Vue) {
         }
         if (
           type === 'component' &&
-          isPlainObject(definition)
+          util.isPlainObject(definition)
         ) {
           definition.name = id
           definition = Vue.extend(definition)
@@ -220,5 +206,5 @@ export default function (Vue) {
   })
 
   // expose internal transition API
-  extend(Vue.transition, transition)
+  util.extend(Vue.transition, transition)
 }
